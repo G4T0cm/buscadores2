@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Mapa de los Buscadores</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">☣️ Mapa de los Buscadores</div>
+
+  <div id="mode-switch">
+    <button id="mode-view" class="mode-btn active" title="Solo ver / mover el mapa">🖐️ Ver</button>
+    <button id="mode-marker" class="mode-btn" title="Añadir marcador">📍 Marcador</button>
+  </div>
+
+  <div id="right-controls">
+    <button id="goto-coords-btn" title="Ir a coordenadas del juego">🎯 Ir a coords</button>
+    <button id="username-btn" title="Cambiar tu nombre">👤 <span id="username-label">Anónimo</span></button>
+    <span id="conn-status" class="offline">●</span>
+  </div>
+</div>
+
+<div id="category-bar" class="hidden">
+  <span class="hint">Elige tipo de marcador y luego toca el mapa:</span>
+  <div id="category-buttons"></div>
+</div>
+
+<div id="map"></div>
+
+<!-- Formulario flotante para nuevo marcador -->
+<div id="marker-form" class="modal hidden">
+  <div class="modal-box">
+    <h3>Nuevo marcador</h3>
+    <div id="marker-form-category"></div>
+    <input type="text" id="marker-label" placeholder="Título (ej: Escopeta + munición)" maxlength="60" />
+    <textarea id="marker-note" placeholder="Notas (opcional)" maxlength="200"></textarea>
+    <div class="modal-actions">
+      <button id="marker-cancel" class="btn-secondary">Cancelar</button>
+      <button id="marker-save" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Formulario flotante para nueva zona -->
+<div id="zone-form" class="modal hidden">
+  <div class="modal-box">
+    <h3>Nueva zona</h3>
+    <input type="text" id="zone-label" placeholder="Título (ej: Zona infestada)" maxlength="60" />
+    <label class="color-label">Color:
+      <input type="color" id="zone-color" value="#ef4444" />
+    </label>
+    <div class="modal-actions">
+      <button id="zone-cancel" class="btn-secondary">Cancelar</button>
+      <button id="zone-save" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Formulario para nombre de usuario -->
+<div id="username-form" class="modal hidden">
+  <div class="modal-box">
+    <h3>Tu nombre</h3>
+    <input type="text" id="username-input" placeholder="Ej: Gato" maxlength="20" />
+    <div class="modal-actions">
+      <button id="username-cancel" class="btn-secondary">Cancelar</button>
+      <button id="username-save" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Formulario para ir a coordenadas del juego -->
+<div id="coords-form" class="modal hidden">
+  <div class="modal-box">
+    <h3>Ir a coordenadas in-game</h3>
+    <p class="hint">Pega las coordenadas X, Y que te da el juego (F8 / debug)</p>
+    <input type="number" step="any" id="coords-x" placeholder="X" />
+    <input type="number" step="any" id="coords-y" placeholder="Y" />
+    <div class="modal-actions">
+      <button id="coords-cancel" class="btn-secondary">Cancelar</button>
+      <button id="coords-go" class="btn-primary">Ir</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

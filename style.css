@@ -1,0 +1,387 @@
+/* ============================================================
+   MAPA DE LOOT — tema "informe de campo / superviviente zombie"
+   Paleta: metal oxidado + papel de dossier + sangre seca + cinta de peligro
+   ============================================================ */
+
+:root {
+  --void:        #0a0b08;
+  --metal-dark:  #1b1a15;
+  --metal:       #26241d;
+  --metal-light: #322f25;
+  --rust:        #6b4423;
+  --rust-light:  #9a6a3a;
+  --parchment:   #d8c9a3;
+  --parchment-dim: #a89b7c;
+  --blood:       #7f1d1d;
+  --blood-bright:#b8241f;
+  --caution:     #d4a017;
+  --toxic:       #6fae3e;
+  --ink:         #e8e0c9;
+  --ink-dim:     #8c8570;
+
+  --font-stencil: "Special Elite", "Courier New", monospace;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font-mono);
+  background: var(--void);
+  color: var(--ink);
+}
+
+/* subtle grain + vignette over the whole app so it reads like a worn field terminal */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5000;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+#map {
+  position: absolute;
+  top: 56px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #111;
+  filter: saturate(0.85) contrast(1.05);
+}
+
+#topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background:
+    linear-gradient(180deg, var(--metal-light), var(--metal) 60%, var(--metal-dark));
+  border-bottom: 3px solid var(--blood);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  z-index: 1000;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* riveted metal plate corners */
+#topbar::before, #topbar::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #6b6a60, #17150f 70%);
+  box-shadow: 0 1px 1px rgba(255,255,255,0.15) inset, 0 1px 2px rgba(0,0,0,0.8);
+}
+#topbar::before { left: 10px; }
+#topbar::after  { right: 10px; }
+
+.brand {
+  font-family: var(--font-stencil);
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--parchment);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(127,29,29,0.6), 1px 1px 0 rgba(0,0,0,0.6);
+  flex-shrink: 0;
+  position: relative;
+  padding-bottom: 3px;
+}
+.brand::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 10%;
+  bottom: -2px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--blood-bright), transparent 90%);
+  filter: blur(0.3px);
+}
+
+#layer-switch, #mode-switch, #right-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#right-controls {
+  margin-left: auto;
+  align-items: center;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.layer-btn, .mode-btn, #goto-coords-btn, #username-btn {
+  font-family: var(--font-stencil);
+  background: linear-gradient(180deg, var(--metal-light), var(--metal-dark));
+  color: var(--parchment-dim);
+  border: 1px solid #45412f;
+  border-radius: 2px;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  padding: 8px 12px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 2px rgba(0,0,0,0.6);
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.layer-btn.active, .mode-btn.active {
+  background:
+    repeating-linear-gradient(135deg, var(--blood-bright), var(--blood-bright) 6px, var(--blood) 6px, var(--blood) 12px);
+  color: #fff2ee;
+  border-color: var(--blood-bright);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(184,36,31,0.5);
+}
+
+.layer-btn:hover, .mode-btn:hover, #goto-coords-btn:hover, #username-btn:hover {
+  background: linear-gradient(180deg, var(--metal-light), var(--rust) 260%);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 6px rgba(212,160,23,0.35);
+}
+
+#conn-status {
+  font-size: 15px;
+  margin-left: 4px;
+}
+#conn-status.online {
+  color: var(--toxic);
+  text-shadow: 0 0 6px rgba(111,174,62,0.9);
+  animation: pulse-toxic 1.8s ease-in-out infinite;
+}
+#conn-status.offline { color: #5a564a; }
+
+@keyframes pulse-toxic {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+#category-bar {
+  position: absolute;
+  top: 56px;
+  left: 0; right: 0;
+  z-index: 999;
+  background:
+    linear-gradient(180deg, #221b0e, #180f06);
+  border-bottom: 2px dashed var(--rust-light);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+#category-bar.hidden { display: none; }
+
+.hint {
+  font-family: var(--font-stencil);
+  font-size: 12px;
+  color: var(--caution);
+  letter-spacing: 0.3px;
+}
+
+#category-buttons, #marker-form-category {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cat-btn {
+  font-family: var(--font-stencil);
+  border: 2px solid rgba(0,0,0,0.4);
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+  padding: 6px 10px;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0.82;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.cat-btn.selected {
+  border-color: var(--caution);
+  opacity: 1;
+  box-shadow: 0 0 6px rgba(212,160,23,0.6), 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* ===================== MODALES: pagina de dossier arrancada ===================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(4,4,2,0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal.hidden { display: none; }
+
+.modal-box {
+  position: relative;
+  background:
+    linear-gradient(180deg, #221f16, #17150f);
+  border: 1px solid var(--rust);
+  border-radius: 2px;
+  padding: 22px 18px 18px;
+  width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7), inset 0 0 40px rgba(0,0,0,0.35);
+}
+
+/* piezas de cinta adhesiva en las esquinas, como si fuera una hoja pegada al mapa */
+.modal-box::before, .modal-box::after {
+  content: "";
+  position: absolute;
+  width: 46px; height: 18px;
+  background: rgba(216,201,163,0.28);
+  border: 1px solid rgba(216,201,163,0.15);
+  top: -9px;
+}
+.modal-box::before { left: 14px; transform: rotate(-6deg); }
+.modal-box::after  { right: 14px; transform: rotate(5deg); }
+
+.modal-box h3 {
+  font-family: var(--font-stencil);
+  margin: 0 0 14px 0;
+  color: var(--blood-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 16px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 8px;
+}
+
+.modal-box input[type="text"],
+.modal-box input[type="number"],
+.modal-box textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 9px;
+  border-radius: 1px;
+  border: 1px solid #453f2c;
+  border-left: 3px solid var(--rust-light);
+  background: #100f0a;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.modal-box input:focus, .modal-box textarea:focus {
+  outline: none;
+  border-left-color: var(--caution);
+  box-shadow: 0 0 0 1px rgba(212,160,23,0.3);
+}
+.modal-box textarea { min-height: 60px; resize: vertical; }
+.color-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-primary, .btn-secondary {
+  font-family: var(--font-stencil);
+  border: none;
+  border-radius: 1px;
+  padding: 9px 16px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.btn-primary {
+  background: linear-gradient(180deg, var(--blood-bright), var(--blood));
+  color: #fff2ee;
+  box-shadow: 0 2px 0 #4a0f0f, 0 3px 6px rgba(0,0,0,0.5);
+}
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary {
+  background: linear-gradient(180deg, var(--metal-light), var(--metal-dark));
+  color: var(--parchment-dim);
+  box-shadow: 0 2px 0 #111, 0 3px 6px rgba(0,0,0,0.4);
+}
+.btn-secondary:hover { color: var(--ink); }
+
+/* ===================== Marcadores de mapa ===================== */
+.zombie-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--parchment);
+  font-size: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.7), 0 0 0 3px rgba(127,29,29,0.35);
+  position: relative;
+}
+.zombie-marker::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(184,36,31,0.5);
+  animation: infection-ping 2.2s ease-out infinite;
+}
+@keyframes infection-ping {
+  0%   { transform: scale(0.7); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.leaflet-popup-content-wrapper {
+  background: linear-gradient(180deg, #221f16, #17150f);
+  color: var(--ink);
+  border: 1px solid var(--rust);
+}
+.leaflet-popup-tip { background: #17150f; }
+.leaflet-popup-content { font-family: var(--font-mono); font-size: 13px; }
+.leaflet-popup-content b {
+  font-family: var(--font-stencil);
+  color: var(--blood-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.popup-delete {
+  margin-top: 6px;
+  font-family: var(--font-stencil);
+  background: linear-gradient(180deg, var(--blood-bright), var(--blood));
+  color: #fff2ee;
+  border: none;
+  border-radius: 1px;
+  padding: 4px 9px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #4a0f0f;
+}
+.popup-meta {
+  font-size: 11px;
+  color: var(--ink-dim);
+  margin-top: 4px;
+  font-style: italic;
+}
