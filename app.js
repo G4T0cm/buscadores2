@@ -1,18 +1,11 @@
-/* ============================================================
-   MAPA DE LOOT - GTA V ZOMBIES
-   Basado en las tiles de Flamm64/GTA-V-World-Map (mismo esquema
-   de teselas que Google Maps: {carpeta}/{z}_{x}_{y}.jpg, tileSize
-   256, zoom 2-7). Usamos el CRS estándar de Leaflet (EPSG3857)
-   porque coincide exactamente con ese esquema.
-   ============================================================ */
 
-// ---------- Categorías de marcadores ----------
 const CATEGORIES = {
   weapons:   { emoji: '🔫', color: '#b91c1c', label: 'Armas / Munición' },
   food:      { emoji: '🍖', color: '#a16207', label: 'Comida / Agua' },
   medkit:    { emoji: '💊', color: '#16a34a', label: 'Botiquín / Medicinas' },
   vehicle:   { emoji: '🚗', color: '#2563eb', label: 'Vehículos' },
   danger:    { emoji: '☠️', color: '#111111', label: 'Zombies / Peligro' },
+   interes:    { emoji: '❓', color: '#fcba03', label: 'interes / punto' },
   safehouse: { emoji: '🏠', color: '#7c3aed', label: 'Base segura / Refugio' },
 };
 
@@ -27,7 +20,7 @@ function makeDivIcon(catKey) {
   });
 }
 
-// ---------- Nombre de usuario (local) ----------
+
 function getUsername() {
   return localStorage.getItem('zm_username') || 'Anónimo';
 }
@@ -37,7 +30,7 @@ function setUsername(name) {
 }
 document.getElementById('username-label').textContent = getUsername();
 
-// ---------- Mapa base ----------
+
 const map = L.map('map', {
   center: [0, 0],
   zoom: 3,
@@ -47,15 +40,12 @@ const map = L.map('map', {
   worldCopyJump: false,
 });
 
-// Las teselas se sirven desde tu propia carpeta Satellite/ (la que
-// descomprimiste del repo de Flamm64), junto a este index.html.
+
 L.tileLayer('Satellite/{z}_{x}_{y}.jpg', {
   tileSize: 256, minZoom: 2, maxZoom: 7, errorTileUrl: 'empty.png',
 }).addTo(map);
 
-// ---------- Conversión de coordenadas in-game -> LatLng ----------
-// Réplica de la función gtamp2googlepx() del mapa original, usando
-// map.unproject en lugar de la proyección de Google Maps.
+
 const REF_ZOOM = 2;
 function gameCoordsToLatLng(x, y) {
   const mx = 0.05030;
@@ -65,7 +55,7 @@ function gameCoordsToLatLng(x, y) {
   return map.unproject([px, py], REF_ZOOM);
 }
 
-// ---------- Firebase ----------
+
 let fbReady = false;
 let db, auth;
 try {
@@ -96,12 +86,12 @@ if (fbReady) {
   });
 }
 
-// ---------- Capas de marcadores y zonas ----------
+
 const markerLayer = L.layerGroup().addTo(map);
 const zoneLayer = L.layerGroup().addTo(map);
 
-const markerObjs = {}; // id -> leaflet marker
-const zoneObjs = {};   // id -> leaflet layer
+const markerObjs = {}; 
+const zoneObjs = {};  
 
 function bindMarkerPopup(leafletMarker, id, data) {
   const cat = CATEGORIES[data.category] || CATEGORIES.danger;
@@ -129,7 +119,7 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// Delegación de click para los botones "Eliminar" dentro de popups
+
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('popup-delete')) {
     const id = e.target.dataset.id;
@@ -140,7 +130,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ---------- Sincronización en tiempo real: marcadores ----------
+
 if (fbReady) {
   db.ref('markers').on('child_added', snap => {
     const id = snap.key;
@@ -166,7 +156,7 @@ if (fbReady) {
     }
   });
 
-  // ---------- Sincronización en tiempo real: zonas ----------
+
   db.ref('zones').on('child_added', snap => {
     const id = snap.key;
     const data = snap.val();
@@ -199,7 +189,7 @@ function buildZoneLayer(data) {
   return null;
 }
 
-// ---------- Modo: Ver / Añadir marcador ----------
+
 let currentMode = 'view';
 let selectedCategory = null;
 
@@ -236,7 +226,7 @@ btnMarker.addEventListener('click', () => {
   setMode('marker');
 });
 
-// ---------- Click en el mapa para añadir marcador ----------
+
 let pendingLatLng = null;
 const markerForm = document.getElementById('marker-form');
 const markerFormCategory = document.getElementById('marker-form-category');
@@ -279,7 +269,7 @@ document.getElementById('marker-save').addEventListener('click', () => {
   markerForm.classList.add('hidden');
 });
 
-// ---------- Dibujo de zonas (Leaflet-Geoman) ----------
+
 map.pm.addControls({
   position: 'topleft',
   drawMarker: false,
@@ -302,7 +292,7 @@ const zoneForm = document.getElementById('zone-form');
 
 map.on('pm:create', (e) => {
   pendingZoneLayer = e.layer;
-  pendingZoneLayer.shape = e.shape; // 'Polygon' | 'Rectangle' | 'Circle'
+  pendingZoneLayer.shape = e.shape; 
   document.getElementById('zone-label').value = '';
   document.getElementById('zone-color').value = '#ef4444';
   zoneForm.classList.remove('hidden');
@@ -327,12 +317,12 @@ document.getElementById('zone-save').addEventListener('click', () => {
     data = { type: 'polygon', latlngs, color, label, createdBy: getUsername(), createdAt: Date.now() };
   }
   db.ref('zones').push(data);
-  map.removeLayer(pendingZoneLayer); // lo quitamos del dibujo temporal; llegará vía Firebase con su popup
+  map.removeLayer(pendingZoneLayer); 
   zoneForm.classList.add('hidden');
   pendingZoneLayer = null;
 });
 
-// ---------- Cambiar nombre de usuario ----------
+
 const usernameForm = document.getElementById('username-form');
 document.getElementById('username-btn').addEventListener('click', () => {
   document.getElementById('username-input').value = getUsername();
@@ -345,7 +335,7 @@ document.getElementById('username-save').addEventListener('click', () => {
   usernameForm.classList.add('hidden');
 });
 
-// ---------- Ir a coordenadas in-game ----------
+
 const coordsForm = document.getElementById('coords-form');
 document.getElementById('goto-coords-btn').addEventListener('click', () => {
   document.getElementById('coords-x').value = '';
