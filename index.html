@@ -23,10 +23,20 @@
   </div>
 
   <div id="right-controls">
+    <button id="filter-btn" title="Filtrar marcadores por categoría">🔎 Filtros</button>
     <button id="goto-coords-btn" title="Ir a coordenadas del juego">🎯 Ir a coords</button>
     <button id="username-btn" title="Cambiar tu nombre">👤 <span id="username-label">Anónimo</span></button>
     <span id="conn-status" class="offline">●</span>
   </div>
+</div>
+
+<div id="filter-panel" class="hidden">
+  <div class="filter-header">
+    <span class="hint">Mostrar en el mapa:</span>
+    <button id="filter-all" class="filter-toggle-all">Marcar todo</button>
+    <button id="filter-none" class="filter-toggle-all">Desmarcar todo</button>
+  </div>
+  <div id="filter-checkboxes"></div>
 </div>
 
 <div id="category-bar" class="hidden">
