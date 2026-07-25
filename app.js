@@ -1,4 +1,3 @@
-
 const CATEGORIES = {
   weapons:   { emoji: '🔫', color: '#b91c1c', label: 'Armas / Munición' },
   food:      { emoji: '🍖', color: '#a16207', label: 'Comida / Agua' },
@@ -111,6 +110,18 @@ function bindZonePopup(leafletLayer, id, data) {
     <button class="popup-delete" data-id="${id}" data-kind="zone">Eliminar</button>
   `;
   leafletLayer.bindPopup(html);
+
+  // Fix: los layers de zona (círculo/polígono) capturan el clic antes de que
+  // llegue al mapa (bubblingMouseEvents=false por defecto en Leaflet), así que
+  // en modo "marcador" el clic sobre una zona debe colocar el marcador ahí
+  // en vez de abrir el popup de la zona.
+  leafletLayer.on('click', (e) => {
+    if (currentMode === 'marker' && selectedCategory) {
+      L.DomEvent.stopPropagation(e);
+      pendingLatLng = e.latlng;
+      openMarkerForm();
+    }
+  });
 }
 
 function escapeHtml(str) {
