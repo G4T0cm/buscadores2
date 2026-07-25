@@ -5,7 +5,7 @@ const CATEGORIES = {
   medkit:    { emoji: '💊', color: '#16a34a', label: 'Botiquín / Medicinas' },
   vehicle:   { emoji: '🚗', color: '#2563eb', label: 'Vehículos' },
   danger:    { emoji: '☠️', color: '#111111', label: 'Zombies / Peligro' },
-   interes:    { emoji: '❓', color: '#fcba03', label: 'interes / punto' },
+  interes:   { emoji: '❓', color: '#fcba03', label: 'interes / punto' },
   safehouse: { emoji: '🏠', color: '#7c3aed', label: 'Base segura / Refugio' },
 };
 
