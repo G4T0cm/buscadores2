@@ -171,6 +171,91 @@ button {
   50% { opacity: 0.4; }
 }
 
+#filter-panel {
+  position: absolute;
+  top: 56px;
+  right: 14px;
+  z-index: 999;
+  background: linear-gradient(180deg, #221b0e, #180f06);
+  border: 1px solid var(--rust-light);
+  border-top: none;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+  padding: 10px 14px 12px;
+  min-width: 220px;
+  max-width: 90vw;
+}
+#filter-panel.hidden { display: none; }
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed var(--rust-light);
+  padding-bottom: 8px;
+}
+
+.filter-toggle-all {
+  font-family: var(--font-stencil);
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, var(--metal-light), var(--metal-dark));
+  color: var(--parchment-dim);
+  border: 1px solid #45412f;
+  border-radius: 2px;
+  padding: 4px 8px;
+}
+.filter-toggle-all:hover { color: var(--ink); }
+
+#filter-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+}
+.filter-item input { accent-color: var(--caution); cursor: pointer; }
+.filter-item .swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.popup-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.popup-edit {
+  font-family: var(--font-stencil);
+  background: linear-gradient(180deg, var(--metal-light), var(--metal-dark));
+  color: var(--parchment);
+  border: 1px solid #45412f;
+  border-radius: 1px;
+  padding: 4px 9px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 2px 0 #111;
+}
+.popup-edit:hover { color: #fff; }
+
 #category-bar {
   position: absolute;
   top: 56px;
