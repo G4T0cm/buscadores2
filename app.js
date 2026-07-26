@@ -131,6 +131,19 @@ function bindZonePopup(leafletLayer, id, data) {
     </div>
   `;
   leafletLayer.bindPopup(html);
+
+  // Las zonas (circle/polygon) son capas "interactivas": en cuanto tienen
+  // un popup, Leaflet detiene la propagación del click hacia el mapa, y
+  // por eso map.on('click', ...) nunca se dispara si clicas DENTRO de una
+  // zona. Replicamos aquí la misma lógica de colocación de marcador.
+  leafletLayer.on('click', (e) => {
+    if (currentMode === 'marker' && selectedCategory) {
+      leafletLayer.closePopup();
+      pendingLatLng = e.latlng;
+      openMarkerForm(null, null);
+    }
+    // si currentMode === 'view', dejamos que el popup normal se abra
+  });
 }
 
 function escapeHtml(str) {
