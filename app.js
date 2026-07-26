@@ -121,6 +121,19 @@ function bindMarkerPopup(leafletMarker, id, data) {
   leafletMarker.bindPopup(html);
 }
 
+// ---------- Popup de zonas (FIX: click dentro de zonas) ----------
+// Las zonas (circle/polygon) son capas "interactivas" de Leaflet. En
+// cuanto una capa tiene CUALQUIER listener de click (incluido el que
+// registra bindPopup() internamente), Leaflet detiene la propagación
+// de ese click hacia el mapa. Por eso map.on('click', ...) -que es lo
+// que coloca los marcadores- nunca se disparaba si el click caía
+// encima de una zona: el popup de la zona "ganaba" siempre.
+//
+// La solución robusta es NO usar bindPopup() de fábrica y controlar
+// nosotros mismos, en un único listener de click, qué hacer según el
+// modo actual: si estamos en modo "marcador", colocamos el marcador;
+// si no, abrimos el popup de la zona manualmente. Así no hay dos
+// listeners compitiendo entre sí.
 function bindZonePopup(leafletLayer, id, data) {
   const html = `
     <b>${escapeHtml(data.label || 'Zona')}</b>
@@ -130,19 +143,22 @@ function bindZonePopup(leafletLayer, id, data) {
       <button class="popup-delete" data-id="${id}" data-kind="zone">Eliminar</button>
     </div>
   `;
-  leafletLayer.bindPopup(html);
 
-  // Las zonas (circle/polygon) son capas "interactivas": en cuanto tienen
-  // un popup, Leaflet detiene la propagación del click hacia el mapa, y
-  // por eso map.on('click', ...) nunca se dispara si clicas DENTRO de una
-  // zona. Replicamos aquí la misma lógica de colocación de marcador.
+  // Guardamos el HTML actualizado para usarlo bajo demanda.
+  leafletLayer._zoneHtml = html;
+
+  // Quitamos cualquier listener de click anterior (por si esta función
+  // se vuelve a llamar en un child_changed) antes de añadir el nuestro,
+  // para no acumular listeners duplicados.
+  leafletLayer.off('click');
+
   leafletLayer.on('click', (e) => {
     if (currentMode === 'marker' && selectedCategory) {
-      leafletLayer.closePopup();
       pendingLatLng = e.latlng;
       openMarkerForm(null, null);
+    } else {
+      leafletLayer.bindPopup(leafletLayer._zoneHtml).openPopup(e.latlng);
     }
-    // si currentMode === 'view', dejamos que el popup normal se abra
   });
 }
 
