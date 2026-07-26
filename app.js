@@ -15,6 +15,7 @@ const CATEGORIES = {
   danger:    { emoji: '☠️', color: '#111111', label: 'Zombies / Peligro' },
   interes:    { emoji: '❓', color: '#fffb00', label: 'interes / punto' },
   safehouse: { emoji: '🏠', color: '#7c3aed', label: 'Base segura / Refugio' },
+  radiation: { emoji: '☢️', color: '#fcba03', label: 'Radiacion' },
 };
 
 function makeDivIcon(catKey) {
